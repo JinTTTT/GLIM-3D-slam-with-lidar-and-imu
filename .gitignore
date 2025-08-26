@@ -6,7 +6,9 @@ ros2_ws/install/
 ros2_ws/log/
 
 # 原始数据文件 (PCAP, JSON metadata)
-data/
+data/os_pcaps/
+data/os_pcaps_indoor/
+data/os_pcaps_outdoor/
 
 # ROS2 bag 数据文件
 ros2_ws/bags/
