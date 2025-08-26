@@ -1,0 +1,107 @@
+# 3D SLAM Project .gitignore
+
+# ROS2 编译和安装文件
+ros2_ws/build/
+ros2_ws/install/
+ros2_ws/log/
+
+# 原始数据文件 (PCAP, JSON metadata)
+data/
+
+# ROS2 bag 数据文件
+ros2_ws/bags/
+*.bag
+*.db3
+*.yaml
+
+# GLIM 结果文件
+glim_result/
+*.ply
+*.pcd
+*.csv
+*.txt
+*.png
+
+# 编译生成文件
+build/
+devel/
+install/
+.catkin_workspace
+
+# IDE 和编辑器文件
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Python 缓存文件
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.env
+
+# C++ 编译文件
+*.o
+*.so
+*.a
+*.dylib
+*.exe
+*.out
+*.app
+
+# CMake 文件
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+*.cmake
+
+# 系统和临时文件
+.tmp/
+*.tmp
+*.log
+*.pid
+core
+
+# 配置和缓存文件
+.cache/
+*.ini
+.config/
+
+# Git 相关 (避免嵌套 git 仓库)
+.git/
+.gitmodules
+
+# ROS 特定文件
+CATKIN_IGNORE
+msg_gen/
+srv_gen/
+msg/*Action.msg
+msg/*ActionFeedback.msg
+msg/*ActionGoal.msg
+msg/*ActionResult.msg
+msg/*Feedback.msg
+msg/*Goal.msg
+msg/*Result.msg
+msg/_*.py
+build_isolated/
+devel_isolated/
+
+# Qt Creator CMake
+CMakeLists.txt.user*
+
+# Emacs
+.#*
+
+# Vim
+*.swp
+*.swo
+
+# backup files
+*~ 
