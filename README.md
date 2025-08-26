@@ -1,80 +1,80 @@
-# 3D SLAM 系统
+# 3D SLAM System
 
-基于 GLIM 算法的三维 SLAM 系统，使用 Ouster OS1-128 激光雷达和内置 IMU 进行实时建图与定位。
+A three-dimensional SLAM system based on the GLIM algorithm, using Ouster OS1-128 LiDAR and built-in IMU for real-time mapping and localization.
 
-## 功能
+## Features
 
-- **实时 SLAM**: 基于 GLIM 算法的 GPU 加速激光雷达-惯性建图
-- **硬件支持**: 专门适配 Ouster OS1-128 激光雷达 + 内置 6 轴 IMU
-- **数据处理**: 支持 PCAP 原始数据回放与 ROS2 bag 格式转换
-- **高精度建图**: 利用因子图优化实现厘米级精度的 3D 点云地图
+- **Real-time SLAM**: GPU-accelerated LiDAR-inertial mapping based on GLIM algorithm
+- **Hardware Support**: Specifically adapted for Ouster OS1-128 LiDAR + built-in 6-axis IMU
+- **Data Processing**: Supports PCAP raw data playback and ROS2 bag format conversion
+- **High-precision Mapping**: Achieves centimeter-level accuracy 3D point cloud maps using factor graph optimization
 
-## 核心组件
+## Core Components
 
-- **GLIM**: 基于因子图的高精度 3D 建图框架
-- **[Ouster ROS](https://github.com/ouster-lidar/ouster-ros/tree/ros2)**: Ouster 传感器官方 ROS2 驱动，支持实时传感器连接、PCAP 回放和数据录制
-- **GTSAM**: 图优化库和点云处理工具
+- **GLIM**: High-precision 3D mapping framework based on factor graphs
+- **[Ouster ROS](https://github.com/ouster-lidar/ouster-ros/tree/ros2)**: Official Ouster sensor ROS2 driver, supporting real-time sensor connection, PCAP playback and data recording
+- **GTSAM**: Graph optimization library and point cloud processing tools
 
-## 运行环境
+## Runtime Environment
 
-- **操作系统**: Ubuntu 22.04 LTS
-- **ROS 版本**: ROS2 Humble
+- **Operating System**: Ubuntu 22.04 LTS
+- **ROS Version**: ROS2 Humble
 
-## 安装指南
+## Installation Guide
 
-本项目使用 **从源码安装** 的方式。完整的安装说明请参考 [GLIM 官方安装指南](https://koide3.github.io/glim/installation.html)。
+This project uses **installation from source**. For complete installation instructions, please refer to the [GLIM Official Installation Guide](https://koide3.github.io/glim/installation.html).
 
-### 1. 安装 GLIM 依赖库
+### 1. Install GLIM Dependencies
 
-请按照 [GLIM 官方安装指南](https://koide3.github.io/glim/installation.html) 中的 **"Common dependencies"** 部分安装所有系统级依赖库（GTSAM、Iridescence、gtsam_points 等）。
+Please follow the **"Common dependencies"** section in the [GLIM Official Installation Guide](https://koide3.github.io/glim/installation.html) to install all system-level dependencies (GTSAM, Iridescence, gtsam_points, etc.).
 
-### 2. 创建 ROS2 工作空间并安装 GLIM
+### 2. Create ROS2 Workspace and Install GLIM
 
 ```bash
-# 创建工作目录
+# Create working directory
 mkdir -p ros2_ws/src
 
-# 克隆 GLIM 相关包
+# Clone GLIM related packages
 cd ros2_ws/src
 git clone https://github.com/koide3/glim
 git clone https://github.com/koide3/glim_ros2
 
-# 编译 GLIM
+# Build GLIM
 cd ../
 colcon build
 ```
 
-### 3. 安装 Ouster 官方 ROS2 驱动
+### 3. Install Ouster Official ROS2 Driver
 
-为了支持 PCAP 数据处理和传感器通信，需要安装 [Ouster 官方 ROS2 驱动](https://github.com/ouster-lidar/ouster-ros/tree/ros2)：
+To support PCAP data processing and sensor communication, install the [Ouster Official ROS2 Driver](https://github.com/ouster-lidar/ouster-ros/tree/ros2):
 
 ```bash
-# 安装 Ouster 相关依赖
+# Install Ouster related dependencies
 sudo apt install -y libpcap-dev libjsoncpp-dev libspdlog-dev \
     libcurl4-openssl-dev libeigen3-dev libtins-dev
 
-# 克隆 Ouster 官方 ROS2 驱动
+# Clone Ouster official ROS2 driver
 cd ros2_ws/src
 git clone -b ros2 --recurse-submodules https://github.com/ouster-lidar/ouster-ros.git
 
-# 编译 Ouster 驱动 (启用 PCAP 支持)
+# Build Ouster driver (enable PCAP support)
 cd ../
 source /opt/ros/humble/setup.bash
 colcon build --packages-select ouster_sensor_msgs ouster_ros \
     --cmake-args -DCMAKE_BUILD_TYPE=Release -DBUILD_PCAP=ON
 
-# 重新编译所有包确保依赖正确
+# Rebuild all packages to ensure correct dependencies
 colcon build
 source install/setup.bash
 ```
 
-> **注意**: Ouster ROS 驱动支持所有 FW v2.0 或更高版本的传感器 (OS0, OS1, OS2, OSDome)。更多详细信息请参考 [官方文档](https://github.com/ouster-lidar/ouster-ros/tree/ros2)。
+> **Note**: Ouster ROS driver supports all sensors with FW v2.0 or higher (OS0, OS1, OS2, OSDome). For more detailed information, please refer to the [official documentation](https://github.com/ouster-lidar/ouster-ros/tree/ros2).
 
 ## Configuration
 
-### 1. 配置 ROS 话题
+### 1. Configure ROS Topics
 
-编辑 `ros2_ws/src/glim/config/config_ros.json` 文件，设置 ROS bag 中的话题名称和坐标框架：
+Edit the `ros2_ws/src/glim/config/config_ros.json` file to set topic names and coordinate frames in the ROS bag:
 
 ```json
 "imu_frame_id": "os_imu",
@@ -83,40 +83,68 @@ source install/setup.bash
 "points_topic": "/ouster/points"
 ```
 
-### 2. 设置 LiDAR-IMU 相对位置
+### 2. Set LiDAR-IMU Relative Position
 
-LiDAR-IMU 相对位置信息可以从原始数据的 `.json` 文件中获取。在 `data/os_pcaps/` 目录下的 JSON 文件中找到 `imu_intrinsics.imu_to_sensor_transform` 参数。
+LiDAR-IMU relative position information can be obtained from the `.json` file of the raw data. Find the `imu_intrinsics.imu_to_sensor_transform` parameter in the JSON file in the `data/os_pcaps/` directory.
 
-**从原始 JSON 获取信息**：
+**Getting information from raw JSON**:
 ```json
-// 例如：data/os_pcaps/ouster_20250604072442.json
+// Example: data/os_pcaps/ouster_20250604072442.json
 "imu_intrinsics": {
     "imu_to_sensor_transform": [
-        1, 0, 0, 6.253,      // 4x4 变换矩阵
-        0, 1, 0, -11.775,    // 单位：毫米 (mm)
+        1, 0, 0, 6.253,      // 4x4 transformation matrix
+        0, 1, 0, -11.775,    // Unit: millimeters (mm)
         0, 0, 1, 7.645,
         0, 0, 0, 1
     ]
 }
 ```
 
-**转换为 GLIM 格式**：
-编辑 `ros2_ws/src/glim/config/config_sensors.json` 文件，将变换信息转换为 GLIM 期望的格式：
+**Convert to GLIM format**:
+Edit the `ros2_ws/src/glim/config/config_sensors.json` file to convert the transformation information to the format expected by GLIM:
 
 ```json
 "T_lidar_imu": [0.006253, -0.011775, 0.007645, 0, 0, 0, 1]
 ```
 
-> **重要转换规则**：
-> 1. **单位转换**：原始数据单位为毫米 (mm)，需要除以 1000 转换为米 (m)
-> 2. **格式转换**：从 4x4 变换矩阵转换为 `[x, y, z, qx, qy, qz, qw]` 格式
-> 3. **坐标提取**：提取变换矩阵中的平移部分 (第4、8、12个元素) 作为 x、y、z 坐标
+> **Important conversion rules**:
+> 1. **Unit conversion**: Raw data units are in millimeters (mm), divide by 1000 to convert to meters (m)
+> 2. **Format conversion**: Convert from 4x4 transformation matrix to `[x, y, z, qx, qy, qz, qw]` format
+> 3. **Coordinate extraction**: Extract the translation part (4th, 8th, 12th elements) from the transformation matrix as x, y, z coordinates
 
-## 运行
+### 3. GPU Acceleration Configuration
 
-启动 3D SLAM 系统，需要先启动glim，然后准备并播放数据。
+This system uses **GPU acceleration by default** for optimal performance:
 
-### 1. 启动 GLIM 建图算法
+**Hardware Configuration:**
+- **CPU**: Intel Core i7-13650HX (13th Gen)
+- **GPU**: NVIDIA GeForce RTX 4060 (8GB VRAM)
+- **CUDA**: Version 12.8
+
+**GPU Mode (Default):**
+Edit `ros2_ws/src/glim/config/config.json`:
+```json
+{
+  "config_odometry": "config_odometry_gpu.json",
+  "config_sub_mapping": "config_sub_mapping_gpu.json",
+  "config_global_mapping": "config_global_mapping_gpu.json"
+}
+```
+
+**CPU-only Mode:**
+```json
+{
+  "config_odometry": "config_odometry_cpu.json",
+  "config_sub_mapping": "config_sub_mapping_cpu.json",
+  "config_global_mapping": "config_global_mapping_cpu.json"
+}
+```
+
+## Running
+
+To start the 3D SLAM system, first start GLIM, then prepare and play the data.
+
+### 1. Start GLIM Mapping Algorithm
 
 ```bash
 cd ros2_ws
@@ -124,40 +152,40 @@ source install/setup.bash
 ros2 run glim_ros glim_rosnode
 ```
 
-### 2. 数据准备与播放
+### 2. Data Preparation and Playback
 
-根据数据类型选择合适的播放方式：
+Choose the appropriate playback method according to the data type:
 
-#### 方式1: 直接播放现有 ROS2 bag 文件
+#### Method 1: Directly play existing ROS2 bag files
 ```bash
 ros2 bag play bags/official_ouster_for_glim
 ```
 
-#### 方式2: 直接播放 PCAP 文件 (PCAP 回放模式)
+#### Method 2: Directly play PCAP files (PCAP playback mode)
 
-根据 [Ouster 官方文档](https://github.com/ouster-lidar/ouster-ros/tree/ros2) 的 PCAP 回放模式：
+According to the PCAP playback mode in the [Ouster Official Documentation](https://github.com/ouster-lidar/ouster-ros/tree/ros2):
 
 ```bash
-# 室内数据 (循环播放)
+# Indoor data (loop playback)
 ros2 launch ouster_ros replay_pcap.launch.xml \
     pcap_file:=data/os_pcaps/ouster_20250604072442.pcap \
     metadata:=data/os_pcaps/ouster_20250604072442.json \
     viz:=false loop:=true
 
-# 室外数据 (循环播放)
+# Outdoor data (loop playback)
 ros2 launch ouster_ros replay_pcap.launch.xml \
     pcap_file:=data/os_pcaps/ouster_20250604074152.pcap \
     metadata:=data/os_pcaps/ouster_20250604074152.json \
     viz:=false loop:=true
 ```
 
-> **说明**: 从包版本 8.1 开始，如果 bag 文件已包含 metadata 话题，则 metadata 参数为可选。
+> **Note**: Starting from package version 8.1, the metadata parameter is optional if the bag file already contains a metadata topic.
 
-#### 方式3: 录制模式 - 预转换 PCAP 到 ROS2 bag (推荐用于多次使用)
+#### Method 3: Recording mode - Pre-convert PCAP to ROS2 bag (recommended for multiple uses)
 
-使用 Ouster 官方提供的录制模式：
+Use the recording mode provided by Ouster official:
 
-**步骤1**: 启动 PCAP 回放 (不循环)
+**Step 1**: Start PCAP playback (no loop)
 ```bash
 ros2 launch ouster_ros replay_pcap.launch.xml \
     pcap_file:=data/os_pcaps/ouster_20250604072442.pcap \
@@ -165,18 +193,18 @@ ros2 launch ouster_ros replay_pcap.launch.xml \
     viz:=false loop:=false
 ```
 
-**步骤2**: 录制为 ROS2 bag (在另一个终端)
+**Step 2**: Record as ROS2 bag (in another terminal)
 ```bash
 ros2 bag record -o bags/my_recording /ouster/points /ouster/imu /tf_static
 ```
-> **重要**: 必须录制 `/tf_static` 话题，否则 GLIM 会因为缺少坐标变换信息而报错。
+> **Important**: The `/tf_static` topic must be recorded, otherwise GLIM will report errors due to missing coordinate transformation information.
 
-**步骤3**: 播放转换好的 bag 文件
+**Step 3**: Play the converted bag file
 ```bash
 ros2 bag play bags/my_recording
 ```
 
-> **提示**: 也可以直接使用 Ouster 官方的录制启动文件：
+> **Tip**: You can also directly use Ouster's official recording launch file:
 > ```bash
 > ros2 launch ouster_ros record.launch.xml \
 >     sensor_hostname:=<sensor_ip> \
@@ -184,20 +212,58 @@ ros2 bag play bags/my_recording
 > ```
 
 
-## 项目结构
+## Project Structure
 
 ```
 3D_SLAM/
-├── ros2_ws/                  # ROS2 工作空间
+├── ros2_ws/                  # ROS2 workspace
 │   ├── src/
-│   │   ├── glim/            # 核心建图算法
-│   │   ├── glim_ros2/       # ROS2 接口
-│   │   └── ouster-ros/      # Ouster 驱动
-│   └── bags/                # ROS2 bag 数据
-└── data/       # 原始数据和转换工具
+│   │   ├── glim/            # Core mapping algorithm
+│   │   ├── glim_ros2/       # ROS2 interface
+│   │   └── ouster-ros/      # Ouster driver
+│   └── bags/                # ROS2 bag data
+└── data/       # Raw data and conversion tools
 ```
 
-## 硬件
+## Hardware
 
 - **LiDAR**: Ouster OS1-128
-- **IMU**: 内置 6 轴 IMU
+- **IMU**: Built-in 6-axis IMU
+
+## Performance Benchmarks
+
+The following performance statistics were measured during GLIM execution with GPU acceleration enabled:
+
+### System Configuration
+- **CPU**: Intel Core i7-13650HX (13th Gen)
+- **GPU**: NVIDIA GeForce RTX 4060 (8GB VRAM)
+- **CUDA**: Version 12.8
+- **Configuration**: GPU mode with VGICP_GPU acceleration
+
+### Performance Results
+```
+📊 GLIM Performance Statistics
+==================================================================
+Duration: 100s | Samples: 19
+
+💻 CPU (i7-13650HX):
+   Average: 5.1%
+   Peak:    9.9%
+
+🎮 GPU (RTX 4060):
+   Average: 9.7%     Peak: 24%
+   Memory:  3.6%     Peak: 3.8%
+   Temp:    56.0°C    Peak: 57°C
+
+📈 Performance Assessment:
+   CPU: Efficient (5.1% avg)
+   GPU: Efficient (9.7% avg)
+```
+
+### Key Findings
+- **Efficient Resource Usage**: Both CPU and GPU operate well below capacity
+- **Low Memory Footprint**: GPU memory usage remains minimal (< 4%)
+- **Thermal Management**: GPU temperature stays within optimal range
+- **Real-time Capability**: System has significant headroom for real-time processing
+
+> **Note**: Performance may vary depending on point cloud density, mapping area size, and data playback speed. These benchmarks represent typical indoor mapping scenarios with moderate point cloud complexity.
